@@ -4,9 +4,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:my_flutter_app/Models/Department.dart';
-import '/Models/Employee.dart';
-
+import 'package:my_flutter_app/Models/department.dart';
+import 'package:my_flutter_app/Models/employee.dart';
+import 'package:my_flutter_app/Widgets/table_header.dart';
+import 'package:my_flutter_app/Widgets/table_text.dart';
 import 'firebase_options.dart';
 
 DatabaseReference? employeeRef;
@@ -300,7 +301,7 @@ class EmployeeGUI extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        Row(
+        const Row(
           mainAxisSize: MainAxisSize.max,
           children: [
             Expanded(
@@ -308,12 +309,14 @@ class EmployeeGUI extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const DataTableHeader(),
+                  DataTableHeader(
+                    text: "Nhân viên",
+                  ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: EdgeInsets.all(8.0),
                     child: SingleChildScrollView(
                       scrollDirection: Axis.vertical,
-                      child: EmployeeTable(employeeList: employeeList),
+                      child: EmployeeTable(),
                     ),
                   ),
                 ],
@@ -324,10 +327,12 @@ class EmployeeGUI extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const DataTableHeader(),
+                  DataTableHeader(
+                    text: "Phòng ban",
+                  ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: DepartmentTable(departmentList: departmentList),
+                    padding: EdgeInsets.all(8.0),
+                    child: DepartmentTable(),
                   ),
                 ],
               ),
@@ -352,13 +357,15 @@ class DepartmentGUI extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        Column(
+        const Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const DataTableHeader(),
+            DataTableHeader(
+              text: "Phòng ban",
+            ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: DepartmentTable(departmentList: departmentList),
+              padding: EdgeInsets.all(8.0),
+              child: DepartmentTable(),
             ),
           ],
         ),
@@ -744,52 +751,19 @@ class SafeEmployeeGUI extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        const DataTableHeader(),
-        EmployeeTable(
-          employeeList: employeeList,
+        const DataTableHeader(
+          text: "Nhân viên",
         ),
-        const DataTableHeader(),
-        EmployeeTable(
-          employeeList: employeeList,
+        const EmployeeTable(),
+        const DataTableHeader(
+          text: "Nhân viên",
         ),
+        const EmployeeTable(),
         InputArea(
           departmentList: departmentList,
         ),
       ],
     );
-  }
-}
-
-class DataTableHeader extends StatelessWidget {
-  const DataTableHeader({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.white),
-            borderRadius: const BorderRadius.all(Radius.circular(25))),
-        margin: const EdgeInsets.all(16),
-        child: Padding(
-          padding: const EdgeInsets.only(
-            top: 4,
-            bottom: 4,
-            left: 12,
-            right: 12,
-          ),
-          child: Text(
-            textAlign: TextAlign.center,
-            "Bảng nhân viên",
-            textScaleFactor: 1.25,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.lightBlue[300],
-            ),
-          ),
-        ));
   }
 }
 
@@ -896,10 +870,7 @@ class DepartmentData extends DataTableSource {
 class EmployeeTable extends StatelessWidget {
   const EmployeeTable({
     super.key,
-    required this.employeeList,
   });
-
-  final List<Employee> employeeList;
 
   @override
   Widget build(BuildContext context) {
@@ -946,10 +917,7 @@ class EmployeeTable extends StatelessWidget {
 class DepartmentTable extends StatelessWidget {
   const DepartmentTable({
     super.key,
-    required this.departmentList,
   });
-
-  final List<Department> departmentList;
 
   @override
   Widget build(BuildContext context) {
@@ -975,27 +943,6 @@ class DepartmentTable extends StatelessWidget {
                   color: Colors.lightBlue,
                 ))),
       ],
-    );
-  }
-}
-
-class TableText extends StatelessWidget {
-  final String text;
-
-  const TableText({super.key, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: SizedBox(
-        width: 64,
-        child: Text(
-          overflow: TextOverflow.ellipsis,
-          text.toString().trim(),
-          style: const TextStyle(color: Colors.black),
-        ),
-      ),
     );
   }
 }
