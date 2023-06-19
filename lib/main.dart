@@ -4,15 +4,18 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:my_flutter_app/Models/Department.dart';
 import '/Models/Employee.dart';
 
 import 'firebase_options.dart';
 
-List<Employee> employeeList = <Employee>[];
-DatabaseReference? ref;
+DatabaseReference? employeeRef;
+DatabaseReference? departmentRef;
 EmployeeData? eData;
+DepartmentData? dData;
 
 int position = -1;
+int dPosition = -1;
 
 var idControl = TextEditingController();
 var nameControl = TextEditingController();
@@ -26,7 +29,8 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  ref = FirebaseDatabase.instance.ref("Employees");
+  employeeRef = FirebaseDatabase.instance.ref("Employees");
+  departmentRef = FirebaseDatabase.instance.ref("Departments");
 
   runApp(const MyApp());
 }
@@ -119,58 +123,178 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late StreamBuilder<DatabaseEvent> builder = employeeGUI();
+  var selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          title: const Text('Quản lý nhân viên'),
+        ),
+        drawer: Drawer(
+          // Add a ListView to the drawer. This ensures the user can scroll
+          // through the options in the drawer if there isn't enough vertical
+          // space to fit everything.
+          child: ListView(
+            // Important: Remove any padding from the ListView.
+            padding: EdgeInsets.zero,
+            children: [
+              const DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.lightBlue,
+                ),
+                child: Text('Menu'),
+              ),
+              ListTile(
+                title: const Text(
+                  'Nhân viên',
+                  style: TextStyle(
+                    color: Colors.lightBlue,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  if (selectedIndex != 0) {
+                    setState(() {
+                      builder = employeeGUI();
+                      selectedIndex = 0;
+                    });
+                  }
+                },
+              ),
+              ListTile(
+                title: const Text(
+                  'Phòng ban',
+                  style: TextStyle(
+                    color: Colors.lightBlue,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  if (selectedIndex != 1) {
+                    setState(() {
+                      builder = departmentGUI();
+                      selectedIndex = 1;
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
         backgroundColor: Theme.of(context).colorScheme.background,
-        body: StreamBuilder(stream: ref!.onValue, builder: buildLayout));
+        body: builder);
   }
 
-  Widget buildLayout(context, snapshot) {
-    List<Employee> employeeList = <Employee>[];
+  StreamBuilder<DatabaseEvent> employeeGUI() {
+    return StreamBuilder(
+        stream: departmentRef!.onValue,
+        builder: (context, snapshot) {
+          return StreamBuilder(
+              stream: employeeRef!.onValue,
+              builder: (context2, snapshot2) {
+                List<Department> departmentList = <Department>[];
+                if (snapshot.hasData &&
+                    snapshot.data != null &&
+                    (snapshot.data!).snapshot.value != null) {
+                  final eList = (snapshot.data!).snapshot.children;
+                  for (var e in eList) {
+                    departmentList.add(Department(
+                      int.parse(e.key.toString()),
+                      e.children.elementAt(0).value.toString(),
+                    ));
+                  }
+                  departmentList.sort(
+                    (a, b) => a.departmentID.compareTo(b.departmentID),
+                  );
+                }
 
-    if (snapshot.hasData &&
-        snapshot.data != null &&
-        (snapshot.data!).snapshot.value != null) {
-      final eList = (snapshot.data!).snapshot.children;
-      eList.forEach((e) {
-        if (e != null) {
-          employeeList.add(Employee(
-            int.parse(e.key.toString()),
-            e.value['name'].toString(),
-            e.value['address'].toString(),
-            e.value['phoneNumber'].toString(),
-          ));
-        }
-      });
-      employeeList.sort(
-        (a, b) => a.employeeID.compareTo(b.employeeID),
-      );
-    }
+                List<Employee> employeeList = <Employee>[];
+                if (snapshot2.hasData &&
+                    snapshot2.data != null &&
+                    (snapshot2.data!).snapshot.value != null) {
+                  final eList = (snapshot2.data!).snapshot.children;
+                  for (var e in eList) {
+                    employeeList.add(Employee(
+                        int.parse(e.key.toString()),
+                        e.children.elementAt(0).value.toString(),
+                        e.children.elementAt(1).value.toString(),
+                        e.children.elementAt(2).value.toString()));
+                  }
+                  employeeList.sort(
+                    (a, b) => a.employeeID.compareTo(b.employeeID),
+                  );
+                }
 
-    eData = EmployeeData(employeeList: employeeList);
+                eData = EmployeeData(employeeList: employeeList);
+                dData = DepartmentData(departmentList: departmentList);
 
-    return LayoutBuilder(
-      builder: (BuildContext buildContext, BoxConstraints boxConstraints) {
-        if (boxConstraints.maxWidth > 600) {
-          return TableArea(employeeList: employeeList);
-        } else {
-          return SafeArea(
-            child: SafeTableArea(employeeList: employeeList),
+                return LayoutBuilder(
+                  builder: (BuildContext buildContext,
+                      BoxConstraints boxConstraints) {
+                    if (boxConstraints.maxWidth > 600) {
+                      return EmployeeGUI(
+                          employeeList: employeeList,
+                          departmentList: departmentList);
+                    } else {
+                      return SafeArea(
+                        child: SafeEmployeeGUI(
+                            employeeList: employeeList,
+                            departmentList: departmentList),
+                      );
+                    }
+                  },
+                );
+              });
+        });
+  }
+
+  StreamBuilder<DatabaseEvent> departmentGUI() {
+    return StreamBuilder(
+        stream: departmentRef!.onValue,
+        builder: (context, snapshot) {
+          List<Department> departmentList = <Department>[];
+          if (snapshot.hasData &&
+              snapshot.data != null &&
+              (snapshot.data!).snapshot.value != null) {
+            final eList = (snapshot.data!).snapshot.children;
+            for (var e in eList) {
+              departmentList.add(Department(
+                int.parse(e.key.toString()),
+                e.children.elementAt(0).value.toString(),
+              ));
+            }
+            departmentList.sort(
+              (a, b) => a.departmentID.compareTo(b.departmentID),
+            );
+          }
+
+          dData = DepartmentData(departmentList: departmentList);
+
+          return LayoutBuilder(
+            builder:
+                (BuildContext buildContext, BoxConstraints boxConstraints) {
+              if (boxConstraints.maxWidth > 600) {
+                return DepartmentGUI(departmentList: departmentList);
+              } else {
+                return const SafeArea(child: Placeholder());
+              }
+            },
           );
-        }
-      },
-    );
+        });
   }
 }
 
-class TableArea extends StatelessWidget {
-  const TableArea({
+class EmployeeGUI extends StatelessWidget {
+  const EmployeeGUI({
     super.key,
     required this.employeeList,
+    required this.departmentList,
   });
 
   final List<Employee> employeeList;
+  final List<Department> departmentList;
 
   @override
   Widget build(BuildContext context) {
@@ -203,97 +327,271 @@ class TableArea extends StatelessWidget {
                   const DataTableHeader(),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: EmployeeTable(employeeList: employeeList),
+                    child: DepartmentTable(departmentList: departmentList),
                   ),
                 ],
               ),
             ),
           ],
         ),
-        Row(
-          children: [
-            const Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 16.0),
-                  child: SelectableText("Mã nhân viên"),
-                )),
-            Expanded(
-              flex: 6,
-              child: TextField(
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                keyboardType: TextInputType.number,
-                controller: idControl,
-              ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            const Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 16.0),
-                  child: SelectableText("Họ tên"),
-                )),
-            Expanded(
-              flex: 6,
-              child: TextField(
-                controller: nameControl,
-              ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            const Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 16.0),
-                  child: SelectableText("Địa chỉ"),
-                )),
-            Expanded(
-              flex: 6,
-              child: TextField(
-                controller: addressControl,
-              ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            const Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 16.0),
-                  child: SelectableText("Số điện thoại"),
-                )),
-            Expanded(
-              flex: 6,
-              child: TextField(
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                keyboardType: TextInputType.number,
-                controller: phoneNumberControl,
-              ),
-            ),
-          ],
-        ),
-        Container(
-            margin: const EdgeInsets.all(16),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: AddButton(),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: DeleteButton(),
-                ),
-              ],
-            ))
+        InputArea(departmentList: departmentList),
       ],
+    );
+  }
+}
+
+class DepartmentGUI extends StatelessWidget {
+  const DepartmentGUI({
+    super.key,
+    required this.departmentList,
+  });
+
+  final List<Department> departmentList;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const DataTableHeader(),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DepartmentTable(departmentList: departmentList),
+            ),
+          ],
+        ),
+        InputArea(departmentList: departmentList),
+      ],
+    );
+  }
+}
+
+class InputArea extends StatefulWidget {
+  const InputArea({
+    super.key,
+    required this.departmentList,
+  });
+
+  final List<Department> departmentList;
+
+  @override
+  State<InputArea> createState() => _InputAreaState();
+}
+
+class _InputAreaState extends State<InputArea> {
+  bool isReadOnly = true;
+
+  refresh() {
+    setState(() {
+      isReadOnly = !isReadOnly;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext buildContext, BoxConstraints boxConstraints) {
+        if (boxConstraints.maxWidth > 600) {
+          return Column(
+            children: [
+              Row(
+                children: [
+                  const Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 16.0),
+                        child: SelectableText("Mã nhân viên"),
+                      )),
+                  Expanded(
+                    flex: 6,
+                    child: TextField(
+                      readOnly: isReadOnly,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      keyboardType: TextInputType.number,
+                      controller: idControl,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 16.0),
+                        child: SelectableText("Họ tên"),
+                      )),
+                  Expanded(
+                    flex: 6,
+                    child: TextField(
+                      readOnly: isReadOnly,
+                      controller: nameControl,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 16.0),
+                        child: SelectableText("Địa chỉ"),
+                      )),
+                  Expanded(
+                    flex: 6,
+                    child: TextField(
+                      readOnly: isReadOnly,
+                      controller: addressControl,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 16.0),
+                        child: SelectableText("Số điện thoại"),
+                      )),
+                  Expanded(
+                    flex: 6,
+                    child: TextField(
+                      readOnly: isReadOnly,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      keyboardType: TextInputType.number,
+                      controller: phoneNumberControl,
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<Department>(
+                        dropdownColor: Colors.blue,
+                        items: widget.departmentList.map((item) {
+                          return DropdownMenuItem<Department>(
+                            value: item,
+                            child: Text(
+                              item.name,
+                              style: const TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {},
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                  margin: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: AddButton(notifyParent: refresh),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: DeleteButton(),
+                      ),
+                    ],
+                  )),
+            ],
+          );
+        } else {
+          return Column(
+            children: [
+              Row(
+                children: [
+                  const Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 16.0),
+                        child: SelectableText("Mã nhân viên"),
+                      )),
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      keyboardType: TextInputType.number,
+                      controller: idControl,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 16.0),
+                        child: SelectableText("Họ tên"),
+                      )),
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: nameControl,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 16.0),
+                        child: SelectableText("Địa chỉ"),
+                      )),
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: addressControl,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 16.0),
+                        child: SelectableText("Số điện thoại"),
+                      )),
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      keyboardType: TextInputType.number,
+                      controller: phoneNumberControl,
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: AddButton(notifyParent: refresh),
+              ),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: DeleteButton(),
+              ),
+            ],
+          );
+        }
+      },
     );
   }
 }
@@ -301,7 +599,10 @@ class TableArea extends StatelessWidget {
 class AddButton extends StatefulWidget {
   const AddButton({
     super.key,
+    required this.notifyParent,
   });
+
+  final Function() notifyParent;
 
   @override
   State<AddButton> createState() => _AddButtonState();
@@ -325,12 +626,14 @@ class _AddButtonState extends State<AddButton> {
               text = "Lưu";
               position = -1;
               eData!.update();
+              widget.notifyParent();
             });
           } else {
             if (nameControl.text.isNotEmpty &&
                 addressControl.text.isNotEmpty &&
                 phoneNumberControl.text.isNotEmpty) {
-              DatabaseReference newEmpolyeeRef = ref!.child(idControl.text);
+              DatabaseReference newEmpolyeeRef =
+                  employeeRef!.child(idControl.text);
 
               var event = await newEmpolyeeRef.once();
               var snapshot = event.snapshot;
@@ -346,6 +649,7 @@ class _AddButtonState extends State<AddButton> {
                 addressControl.clear();
                 phoneNumberControl.clear();
                 text = "Thêm";
+                widget.notifyParent();
                 messenger.showSnackBar(const SnackBar(
                     content: Text("Thêm nhân viên thông tin thành công")));
               } else {
@@ -401,7 +705,7 @@ class DeleteButton extends StatelessWidget {
       child: const Text("Ok"),
       onPressed: () {
         Navigator.of(context).pop();
-        DatabaseReference newEmpolyeeRef = ref!.child(idControl.text);
+        DatabaseReference newEmpolyeeRef = employeeRef!.child(idControl.text);
         newEmpolyeeRef.remove();
       },
     );
@@ -426,97 +730,30 @@ class DeleteButton extends StatelessWidget {
   }
 }
 
-class SafeTableArea extends StatelessWidget {
-  const SafeTableArea({
+class SafeEmployeeGUI extends StatelessWidget {
+  const SafeEmployeeGUI({
     super.key,
     required this.employeeList,
+    required this.departmentList,
   });
 
   final List<Employee> employeeList;
+  final List<Department> departmentList;
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       children: [
         const DataTableHeader(),
-        EmployeeTable(employeeList: employeeList),
+        EmployeeTable(
+          employeeList: employeeList,
+        ),
         const DataTableHeader(),
-        // TableArea(employeeList: employeeList),
-        Row(
-          children: [
-            const Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 16.0),
-                  child: SelectableText("Mã nhân viên"),
-                )),
-            Expanded(
-              flex: 2,
-              child: TextField(
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                keyboardType: TextInputType.number,
-                controller: idControl,
-              ),
-            ),
-          ],
+        EmployeeTable(
+          employeeList: employeeList,
         ),
-        Row(
-          children: [
-            const Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 16.0),
-                  child: SelectableText("Họ tên"),
-                )),
-            Expanded(
-              flex: 2,
-              child: TextField(
-                controller: nameControl,
-              ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            const Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 16.0),
-                  child: SelectableText("Địa chỉ"),
-                )),
-            Expanded(
-              flex: 2,
-              child: TextField(
-                controller: addressControl,
-              ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            const Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 16.0),
-                  child: SelectableText("Số điện thoại"),
-                )),
-            Expanded(
-              flex: 2,
-              child: TextField(
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                keyboardType: TextInputType.number,
-                controller: phoneNumberControl,
-              ),
-            ),
-          ],
-        ),
-        const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: AddButton(),
-        ),
-        const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: DeleteButton(),
+        InputArea(
+          departmentList: departmentList,
         ),
       ],
     );
@@ -611,7 +848,52 @@ class EmployeeData extends DataTableSource {
   int get selectedRowCount => 0;
 }
 
-class EmployeeTable extends StatefulWidget {
+class DepartmentData extends DataTableSource {
+  DepartmentData({
+    required this.departmentList,
+  });
+
+  final List<Department> departmentList;
+
+  @override
+  DataRow? getRow(int index) {
+    final p = departmentList[index];
+
+    return DataRow.byIndex(
+      onSelectChanged: (value) {
+        dPosition = index;
+        notifyListeners();
+      },
+      index: index,
+      cells: [
+        DataCell(TableText(text: p.departmentID.toString())),
+        DataCell(TableText(text: p.name.trim())),
+      ],
+      color: MaterialStateProperty.resolveWith<Color?>(
+          (Set<MaterialState> states) {
+        if (position == index) {
+          return Colors.grey[200];
+        }
+        return Colors.white; // Use the default value.
+      }),
+    );
+  }
+
+  void update() {
+    notifyListeners();
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => departmentList.length;
+
+  @override
+  int get selectedRowCount => 0;
+}
+
+class EmployeeTable extends StatelessWidget {
   const EmployeeTable({
     super.key,
     required this.employeeList,
@@ -619,11 +901,6 @@ class EmployeeTable extends StatefulWidget {
 
   final List<Employee> employeeList;
 
-  @override
-  State<EmployeeTable> createState() => _EmployeeTableState();
-}
-
-class _EmployeeTableState extends State<EmployeeTable> {
   @override
   Widget build(BuildContext context) {
     return PaginatedDataTable(
@@ -656,6 +933,42 @@ class _EmployeeTableState extends State<EmployeeTable> {
                 ))),
         DataColumn(
             label: Text('SĐT',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.lightBlue,
+                ))),
+      ],
+    );
+  }
+}
+
+class DepartmentTable extends StatelessWidget {
+  const DepartmentTable({
+    super.key,
+    required this.departmentList,
+  });
+
+  final List<Department> departmentList;
+
+  @override
+  Widget build(BuildContext context) {
+    return PaginatedDataTable(
+      header: null,
+      showCheckboxColumn: false,
+      showFirstLastButtons: true,
+      rowsPerPage: 5,
+      source: dData!,
+      columns: const [
+        DataColumn(
+            label: Text('ID',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.lightBlue,
+                ))),
+        DataColumn(
+            label: Text('Tên',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
