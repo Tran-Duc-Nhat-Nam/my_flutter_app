@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:my_flutter_app/Models/department.dart';
-import 'package:my_flutter_app/Widgets/Department/input_area.dart';
+import 'package:my_flutter_app/Widgets/Department/InputArea/layout_builder.dart';
 import 'package:my_flutter_app/Widgets/Department/table_data_source.dart';
 import 'package:my_flutter_app/Widgets/Department/table.dart';
 import 'package:my_flutter_app/Widgets/table_header.dart';
@@ -68,40 +68,31 @@ class _DepartmentScreenState extends State<DepartmentScreen> {
               getNameControl: getNameControl,
             );
 
-            return LayoutBuilder(
-              builder:
-                  (BuildContext buildContext, BoxConstraints boxConstraints) {
-                if (boxConstraints.maxWidth > 600) {
-                  return ListView(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const DataTableHeader(
-                            text: "Phòng ban",
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: DepartmentTable(
-                              getData: getData,
-                            ),
-                          ),
-                        ],
-                      ),
-                      InputArea(
-                        getPosition: getPosition,
-                        setPosition: setPosition,
-                        getIdControl: getIdControl,
-                        getNameControl: getNameControl,
-                        getRef: getRef,
+            return ListView(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const DataTableHeader(
+                      text: "Phòng ban",
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: DepartmentTable(
                         getData: getData,
                       ),
-                    ],
-                  );
-                } else {
-                  return const SafeArea(child: Placeholder());
-                }
-              },
+                    ),
+                  ],
+                ),
+                InputArea(
+                  getPosition: getPosition,
+                  setPosition: setPosition,
+                  getIdControl: getIdControl,
+                  getNameControl: getNameControl,
+                  getRef: getRef,
+                  getData: getData,
+                ),
+              ],
             );
           }),
     );

@@ -25,7 +25,7 @@ class DeleteButton extends StatelessWidget {
           }
         },
         child: Text(
-          "Delete",
+          "Xóa",
           style: TextStyle(color: Theme.of(context).colorScheme.background),
         ));
   }
@@ -50,7 +50,7 @@ class DeleteButton extends StatelessWidget {
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
       title: const Text("Xác nhận xóa"),
-      content: const Text("Bạn có muốn xóa thông tin nhân viên này không?"),
+      content: const Text("Bạn có muốn xóa thông tin phòng ban này không?"),
       actions: [
         cancelButton,
         continueButton,

@@ -58,10 +58,10 @@ class _AddButtonState extends State<AddButton> {
                 text = "Thêm";
                 widget.notifyParent();
                 messenger.showSnackBar(const SnackBar(
-                    content: Text("Thêm nhân viên thông tin thành công")));
+                    content: Text("Thêm thông tin phòng ban thành công")));
               } else {
                 messenger.showSnackBar(const SnackBar(
-                    content: Text("Thông tin nhân viên đã tồn tại")));
+                    content: Text("Thông tin phòng ban đã tồn tại")));
               }
             } else {
               messenger.showSnackBar(
