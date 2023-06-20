@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:my_flutter_app/Models/department.dart';
@@ -7,19 +5,6 @@ import 'package:my_flutter_app/Widgets/Department/InputArea/layout_builder.dart'
 import 'package:my_flutter_app/Widgets/Department/table_data_source.dart';
 import 'package:my_flutter_app/Widgets/Department/table.dart';
 import 'package:my_flutter_app/Widgets/table_header.dart';
-
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-}
-
-class MyCustomScrollBehavior extends MaterialScrollBehavior {
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-        // etc.
-      };
-}
 
 class DepartmentScreen extends StatefulWidget {
   const DepartmentScreen({super.key, required this.departmentRef});

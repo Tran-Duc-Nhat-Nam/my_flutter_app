@@ -4,10 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:my_flutter_app/Screens/department_screen.dart';
+import 'package:my_flutter_app/Screens/employee_screen.dart';
 import 'Firebase/firebase_options.dart';
-
-DatabaseReference? employeeRef;
-DatabaseReference? departmentRef;
 
 int position = -1;
 int dPosition = -1;
@@ -23,9 +21,6 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
-  employeeRef = FirebaseDatabase.instance.ref("Employees");
-  departmentRef = FirebaseDatabase.instance.ref("Departments");
 
   runApp(const MyApp());
 }
@@ -119,6 +114,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
+  Widget builder = EmployeeScreen(
+      employeeRef: FirebaseDatabase.instance.ref("Employees"),
+      departmentRef: FirebaseDatabase.instance.ref("Departments"));
 
   @override
   Widget build(BuildContext context) {
@@ -127,11 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
           title: const Text('Quản lý nhân viên'),
         ),
         drawer: Drawer(
-          // Add a ListView to the drawer. This ensures the user can scroll
-          // through the options in the drawer if there isn't enough vertical
-          // space to fit everything.
           child: ListView(
-            // Important: Remove any padding from the ListView.
             padding: EdgeInsets.zero,
             children: [
               const DrawerHeader(
@@ -151,6 +145,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   Navigator.pop(context);
                   if (selectedIndex != 0) {
                     setState(() {
+                      builder = EmployeeScreen(
+                          employeeRef:
+                              FirebaseDatabase.instance.ref("Employees"),
+                          departmentRef:
+                              FirebaseDatabase.instance.ref("Departments"));
                       selectedIndex = 0;
                     });
                   }
@@ -167,6 +166,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   Navigator.pop(context);
                   if (selectedIndex != 1) {
                     setState(() {
+                      builder = DepartmentScreen(
+                          departmentRef:
+                              FirebaseDatabase.instance.ref("Departments"));
                       selectedIndex = 1;
                     });
                   }
@@ -176,8 +178,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         backgroundColor: Theme.of(context).colorScheme.background,
-        body: DepartmentScreen(
-          departmentRef: FirebaseDatabase.instance.ref("Departments"),
-        ));
+        body: builder);
   }
 }
