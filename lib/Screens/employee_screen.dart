@@ -76,10 +76,12 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                       final eList = (snapshot2.data!).snapshot.children;
                       for (var e in eList) {
                         employeeList.add(Employee(
-                            int.parse(e.key.toString()),
-                            e.children.elementAt(0).value.toString(),
-                            e.children.elementAt(1).value.toString(),
-                            e.children.elementAt(2).value.toString()));
+                          int.parse(e.key.toString()),
+                          e.child("name").value.toString(),
+                          e.child("address").value.toString(),
+                          e.child("phoneNumber").value.toString(),
+                          int.parse(e.child("departmentID").value.toString()),
+                        ));
                       }
                       employeeList.sort(
                         (a, b) => a.employeeID.compareTo(b.employeeID),

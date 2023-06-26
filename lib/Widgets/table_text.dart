@@ -9,13 +9,10 @@ class TableText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8),
-      child: SizedBox(
-        width: 64,
-        child: Text(
-          overflow: TextOverflow.ellipsis,
-          text.toString().trim(),
-          style: const TextStyle(color: Colors.black),
-        ),
+      child: Text(
+        overflow: TextOverflow.ellipsis,
+        text.toString().trim(),
+        style: const TextStyle(color: Colors.black),
       ),
     );
   }

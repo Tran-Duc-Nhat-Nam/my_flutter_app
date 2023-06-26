@@ -8,6 +8,7 @@
 
 #include <firebase_core/firebase_core_plugin_c_api.h>
 #include <sqlite3_flutter_libs/sqlite3_flutter_libs_plugin.h>
+#include <url_launcher_windows/url_launcher_windows.h>
 #include <webview_windows/webview_windows_plugin.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
@@ -15,6 +16,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("FirebaseCorePluginCApi"));
   Sqlite3FlutterLibsPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("Sqlite3FlutterLibsPlugin"));
+  UrlLauncherWindowsRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("UrlLauncherWindows"));
   WebviewWindowsPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("WebviewWindowsPlugin"));
 }

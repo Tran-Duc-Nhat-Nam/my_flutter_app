@@ -45,6 +45,13 @@ class EmployeeTable extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   color: Colors.lightBlue,
                 ))),
+        DataColumn(
+            label: Text('Mã phòng ban',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.lightBlue,
+                ))),
       ],
     );
   }

@@ -37,6 +37,7 @@ class EmployeeData extends DataTableSource {
         DataCell(TableText(text: p.name.trim())),
         DataCell(TableText(text: p.address.trim())),
         DataCell(TableText(text: p.phoneNumber.trim())),
+        DataCell(TableText(text: p.departmentID.toString().trim())),
       ],
       color: MaterialStateProperty.resolveWith<Color?>(
           (Set<MaterialState> states) {

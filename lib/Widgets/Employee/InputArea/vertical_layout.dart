@@ -41,6 +41,8 @@ class _VerticalInputAreaState extends State<VerticalInputArea> {
     });
   }
 
+  int selectedIndex = -1;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -116,14 +118,16 @@ class _VerticalInputAreaState extends State<VerticalInputArea> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: AddButton(
-              notifyParent: refresh,
-              getPosition: widget.getPosition,
-              setPosition: widget.setPosition,
-              getIdControl: widget.getIdControl,
-              getNameControl: widget.getNameControl,
-              getRef: widget.getRef,
-              getAdressControl: widget.getAdressControl,
-              getPhoneNumberControl: widget.getPhoneNumberControl),
+            notifyParent: refresh,
+            getPosition: widget.getPosition,
+            setPosition: widget.setPosition,
+            getIdControl: widget.getIdControl,
+            getNameControl: widget.getNameControl,
+            getRef: widget.getRef,
+            getAdressControl: widget.getAdressControl,
+            getPhoneNumberControl: widget.getPhoneNumberControl,
+            getDepartmentID: getDepartmentID,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
@@ -132,5 +136,9 @@ class _VerticalInputAreaState extends State<VerticalInputArea> {
         ),
       ],
     );
+  }
+
+  int getDepartmentID() {
+    return widget.departmentList[selectedIndex].departmentID;
   }
 }

@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:my_flutter_app/Screens/department_screen.dart';
 import 'package:my_flutter_app/Screens/employee_screen.dart';
 import 'Firebase/firebase_options.dart';
+import 'package:video_player/video_player.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 int position = -1;
 int dPosition = -1;
@@ -174,10 +176,61 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
                 },
               ),
+              ListTile(
+                title: const Text(
+                  'Video',
+                  style: TextStyle(
+                    color: Colors.lightBlue,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  if (selectedIndex != 1) {
+                    setState(() {
+                      builder = const VideoApp();
+                      selectedIndex = 2;
+                    });
+                  }
+                },
+              ),
             ],
           ),
         ),
         backgroundColor: Theme.of(context).colorScheme.background,
         body: builder);
+  }
+}
+
+class VideoApp extends StatefulWidget {
+  const VideoApp({super.key});
+
+  @override
+  _VideoAppState createState() => _VideoAppState();
+}
+
+class _VideoAppState extends State<VideoApp> {
+  _VideoAppState();
+
+  // If the requirement is just to play a single video.
+  final _controller = YoutubePlayerController.fromVideoId(
+    videoId: 'X8mhF6HgzVA',
+    autoPlay: false,
+    params: const YoutubePlayerParams(showFullscreenButton: true),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        title: 'Video Demo',
+        home: Scaffold(
+          body: Center(
+              child: FractionallySizedBox(
+            heightFactor: 0.9,
+            child: YoutubePlayer(
+              controller: _controller,
+              aspectRatio: 16 / 9,
+            ),
+          )),
+        ));
   }
 }

@@ -1,6 +1,7 @@
 class Employee {
-  int employeeID;
+  int employeeID, departmentID;
   String name, address, phoneNumber;
 
-  Employee(this.employeeID, this.name, this.address, this.phoneNumber);
+  Employee(this.employeeID, this.name, this.address, this.phoneNumber,
+      this.departmentID);
 }

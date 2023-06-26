@@ -12,6 +12,7 @@ class AddButton extends StatefulWidget {
     required this.getRef,
     required this.getAdressControl,
     required this.getPhoneNumberControl,
+    required this.getDepartmentID,
   });
 
   final Function() notifyParent;
@@ -22,6 +23,7 @@ class AddButton extends StatefulWidget {
   final Function() getAdressControl;
   final Function() getPhoneNumberControl;
   final Function() getRef;
+  final Function() getDepartmentID;
 
   @override
   State<AddButton> createState() => _AddButtonState();
@@ -63,6 +65,7 @@ class _AddButtonState extends State<AddButton> {
                   "name": widget.getNameControl().text,
                   "address": widget.getAdressControl().text,
                   "phoneNumber": widget.getPhoneNumberControl().text,
+                  "departmentID": widget.getDepartmentID().toString(),
                 });
                 widget.getIdControl().clear();
                 widget.getNameControl().clear();
