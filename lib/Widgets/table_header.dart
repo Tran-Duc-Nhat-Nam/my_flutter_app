@@ -14,8 +14,8 @@ class DataTableHeader extends StatelessWidget {
         decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(color: Colors.white),
-            borderRadius: const BorderRadius.all(Radius.circular(25))),
-        margin: const EdgeInsets.all(16),
+            borderRadius: const BorderRadius.all(Radius.circular(10))),
+        margin: const EdgeInsets.all(12),
         child: Padding(
           padding: const EdgeInsets.only(
             top: 4,

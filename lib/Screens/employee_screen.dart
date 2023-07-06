@@ -292,9 +292,9 @@ class SafeEmployeeGUI extends StatelessWidget {
         const DataTableHeader(
           text: "Nhân viên",
         ),
-        EmployeeTable(getData: getDepartmentData),
+        EmployeeTable(getData: getEmployeeData),
         const DataTableHeader(
-          text: "Nhân viên",
+          text: "Phòng ban",
         ),
         DepartmentTable(getData: getDepartmentData),
         InputArea(

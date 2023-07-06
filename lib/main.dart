@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:my_flutter_app/Screens/department_screen.dart';
 import 'package:my_flutter_app/Screens/employee_screen.dart';
 import 'Firebase/firebase_options.dart';
-import 'package:video_player/video_player.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 int position = -1;
@@ -100,6 +99,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       scrollBehavior: MyCustomScrollBehavior(),
+      debugShowCheckedModeBanner: false,
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -123,81 +123,106 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Quản lý nhân viên'),
+      appBar: AppBar(
+        title: const Text(
+          'Quản lý nhân viên',
+          style: TextStyle(color: Colors.white),
         ),
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Colors.lightBlue,
-                ),
-                child: Text('Menu'),
-              ),
-              ListTile(
-                title: const Text(
-                  'Nhân viên',
-                  style: TextStyle(
-                    color: Colors.lightBlue,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  if (selectedIndex != 0) {
-                    setState(() {
-                      builder = EmployeeScreen(
-                          employeeRef:
-                              FirebaseDatabase.instance.ref("Employees"),
-                          departmentRef:
-                              FirebaseDatabase.instance.ref("Departments"));
-                      selectedIndex = 0;
-                    });
-                  }
-                },
-              ),
-              ListTile(
-                title: const Text(
-                  'Phòng ban',
-                  style: TextStyle(
-                    color: Colors.lightBlue,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  if (selectedIndex != 1) {
-                    setState(() {
-                      builder = DepartmentScreen(
-                          departmentRef:
-                              FirebaseDatabase.instance.ref("Departments"));
-                      selectedIndex = 1;
-                    });
-                  }
-                },
-              ),
-              ListTile(
-                title: const Text(
-                  'Video',
-                  style: TextStyle(
-                    color: Colors.lightBlue,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  if (selectedIndex != 1) {
-                    setState(() {
-                      builder = const VideoApp();
-                      selectedIndex = 2;
-                    });
-                  }
-                },
-              ),
-            ],
+        iconTheme: const IconThemeData(color: Colors.white),
+        flexibleSpace: Container(
+          padding: EdgeInsets.zero,
+          margin: EdgeInsets.zero,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[
+                  Color.fromRGBO(30, 144, 255, 1),
+                  Color.fromRGBO(148, 0, 211, 1),
+                ]),
           ),
         ),
-        backgroundColor: Theme.of(context).colorScheme.background,
-        body: builder);
+      ),
+      drawer: Drawer(
+        surfaceTintColor: Colors.amber,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.lightBlue,
+              ),
+              child: Center(
+                child: Text(
+                  'Menu',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              title: const Text(
+                'Nhân viên',
+                style: TextStyle(
+                  color: Colors.lightBlue,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                if (selectedIndex != 0) {
+                  setState(() {
+                    builder = EmployeeScreen(
+                        employeeRef: FirebaseDatabase.instance.ref("Employees"),
+                        departmentRef:
+                            FirebaseDatabase.instance.ref("Departments"));
+                    selectedIndex = 0;
+                  });
+                }
+              },
+            ),
+            ListTile(
+              title: const Text(
+                'Phòng ban',
+                style: TextStyle(
+                  color: Colors.lightBlue,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                if (selectedIndex != 1) {
+                  setState(() {
+                    builder = DepartmentScreen(
+                        departmentRef:
+                            FirebaseDatabase.instance.ref("Departments"));
+                    selectedIndex = 1;
+                  });
+                }
+              },
+            ),
+            ListTile(
+              title: const Text(
+                'Video',
+                style: TextStyle(
+                  color: Colors.lightBlue,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                if (selectedIndex != 1) {
+                  setState(() {
+                    builder = const VideoApp();
+                    selectedIndex = 2;
+                  });
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+      backgroundColor: Theme.of(context).colorScheme.background,
+      body: builder,
+    );
   }
 }
 
@@ -211,26 +236,43 @@ class VideoApp extends StatefulWidget {
 class _VideoAppState extends State<VideoApp> {
   _VideoAppState();
 
-  // If the requirement is just to play a single video.
-  final _controller = YoutubePlayerController.fromVideoId(
-    videoId: 'X8mhF6HgzVA',
-    autoPlay: false,
-    params: const YoutubePlayerParams(showFullscreenButton: true),
-  );
+  TextEditingController tec = TextEditingController();
+  var videoId = 'X8mhF6HgzVA';
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: 'Video Demo',
-        home: Scaffold(
-          body: Center(
-              child: FractionallySizedBox(
-            heightFactor: 0.9,
-            child: YoutubePlayer(
-              controller: _controller,
-              aspectRatio: 16 / 9,
-            ),
+    final controller = YoutubePlayerController.fromVideoId(
+      videoId: videoId,
+      autoPlay: false,
+      params: const YoutubePlayerParams(showFullscreenButton: true),
+    );
+
+    return Scaffold(
+      body: Column(
+        children: [
+          const Text('Tên phim'),
+          TextField(
+            controller: tec,
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              setState(() {
+                var v = tec.text.split('v=');
+                print(v);
+                controller.videoUrl.then((value) => {print(value)});
+                if (v.length > 1) {
+                  videoId = v[1];
+                }
+              });
+            },
+          ),
+          Center(
+              child: YoutubePlayer(
+            controller: controller,
+            aspectRatio: 16 / 9,
           )),
-        ));
+        ],
+      ),
+    );
   }
 }

@@ -57,11 +57,14 @@ class _HorizontalInputAreaState extends State<HorizontalInputArea> {
                 )),
             Expanded(
               flex: 6,
-              child: TextField(
-                readOnly: isReadOnly,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                keyboardType: TextInputType.number,
-                controller: widget.getIdControl(),
+              child: Tooltip(
+                message: "Vui lòng chỉ nhập số",
+                child: TextField(
+                  readOnly: isReadOnly,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  keyboardType: TextInputType.number,
+                  controller: widget.getIdControl(),
+                ),
               ),
             ),
           ],
@@ -121,61 +124,88 @@ class _HorizontalInputAreaState extends State<HorizontalInputArea> {
         ),
         Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 16.0),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<Department>(
-                  dropdownColor: Colors.blue,
-                  items: widget.departmentList.map((item) {
-                    return DropdownMenuItem<Department>(
-                      value: item,
-                      child: Text(
-                        item.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                  value: selectedIndex < 0
-                      ? null
-                      : widget.departmentList[selectedIndex],
-                  onChanged: (value) {
-                    setState(() {
-                      selectedIndex = widget.departmentList.indexOf(value!);
-                    });
-                  },
+            Container(
+              margin: const EdgeInsets.all(16.0),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 8.0,
+                    top: 4.0,
+                    right: 8.0,
+                    bottom: 4.0,
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<Department>(
+                      focusColor: Colors.white,
+                      selectedItemBuilder: (context) {
+                        return widget.departmentList.map((item) {
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              left: 8.0,
+                              right: 8.0,
+                            ),
+                            child: Center(
+                              child: Text(
+                                item.name,
+                                style: const TextStyle(
+                                  color: Colors.lightBlue,
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList();
+                      },
+                      dropdownColor: Colors.blue,
+                      items: widget.departmentList.map((item) {
+                        return DropdownMenuItem<Department>(
+                          value: item,
+                          child: Text(
+                            item.name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      value: selectedIndex < 0
+                          ? null
+                          : widget.departmentList[selectedIndex],
+                      onChanged: (value) {
+                        setState(() {
+                          selectedIndex = widget.departmentList.indexOf(value!);
+                        });
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),
           ],
         ),
-        Container(
-            margin: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: AddButton(
-                    notifyParent: refresh,
-                    getPosition: widget.getPosition,
-                    setPosition: widget.setPosition,
-                    getIdControl: widget.getIdControl,
-                    getNameControl: widget.getNameControl,
-                    getRef: widget.getRef,
-                    getAdressControl: widget.getAdressControl,
-                    getPhoneNumberControl: widget.getPhoneNumberControl,
-                    getDepartmentID: getDepartmentID,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: DeleteButton(
-                      getIdControl: widget.getIdControl, getRef: widget.getRef),
-                ),
-              ],
-            )),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: AddButton(
+                notifyParent: refresh,
+                getPosition: widget.getPosition,
+                setPosition: widget.setPosition,
+                getIdControl: widget.getIdControl,
+                getNameControl: widget.getNameControl,
+                getRef: widget.getRef,
+                getAdressControl: widget.getAdressControl,
+                getPhoneNumberControl: widget.getPhoneNumberControl,
+                getDepartmentID: getDepartmentID,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DeleteButton(
+                  getIdControl: widget.getIdControl, getRef: widget.getRef),
+            ),
+          ],
+        ),
       ],
     );
   }
